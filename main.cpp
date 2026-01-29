@@ -8,6 +8,10 @@ int main(int argc, char* argv[]) {
   proc_stats.processGrubhubCsvFile("GrubhubEarnings2025Simplified.csv");
   proc_stats.processUberEatsCsvFile("UberEarnings.csv");
   proc_stats.analyzeTips();
+  std::cout << std::endl;
+  proc_stats.analyzeTips(ubereats::kUberEatsName);
+  std::cout << std::endl;
+  proc_stats.analyzeTips(grubhub::kGrubhubName);
   //proc_stats.analyzeLocations();
   //std::sort(deliveries.begin(), deliveries.end(), [](const auto& d1, const auto& d2) { return d1.date() < d2.date();});
   /*for (const auto& d : deliveries) {
