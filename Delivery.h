@@ -95,6 +95,14 @@ public:
     return 0;
   }
 
+  std::string getCompany() const {
+    return company_;
+  }
+
+  void setCompany(const std::string& company) {
+    company_ = company;
+  }
+
 private:
   float earnings_non_tip_{0};
   float earnings_tip_{0};
@@ -102,6 +110,7 @@ private:
   std::string origin_{};
   float miles_{0};
   bool accepted_{true};
+  std::string company_;
 };
 
 #endif //DELIVERY_H_

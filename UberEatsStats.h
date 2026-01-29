@@ -2,6 +2,7 @@
 #include <string>
 
 namespace ubereats {
+  const std::string kUberEatsName{"Uber Eats"};
   const std::string kTimeHeader{"Local Timestamp"};
   const std::vector<std::string> kNonTipClass{
       "transport.fare.upfront_base", "intermediary.eats.courier.fare.supplement", "intermediary.incentive.guarantee_surge",

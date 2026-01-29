@@ -27,10 +27,11 @@ public:
       deliveries.back().setMiles(std::stof(doc.GetCell<std::string>(grubhub::kMilesHeader, i)));
       deliveries.back().setAccepted(
         (doc.GetCell<std::string>(grubhub::kAcceptedHeader, i) == grubhub::kOrderAccepted) ? true : false);
+      deliveries.back().setCompany(grubhub::kGrubhubName);
     }
     //remove any duplicate deliveries in vector (seems that the Grubhub csv file can contain duplicates)
     std::sort(deliveries.begin(), deliveries.end());
-    auto newEnd = std::unique(deliveries.begin(), deliveries.end());
+    const auto newEnd = std::unique(deliveries.begin(), deliveries.end());
     deliveries.erase(newEnd, deliveries.end());
   }
 
@@ -42,7 +43,7 @@ public:
     std::map<std::string, Delivery> deliveries_id_map;
     for (size_t i=0; i < doc.GetRowCount(); i++) {
       //get the trip ID
-      auto id = doc.GetCell<std::string>(ubereats::kTripIDHeader, i);
+      const auto id = doc.GetCell<std::string>(ubereats::kTripIDHeader, i);
       if (!(deliveries_id_map.contains(id))) {
         //insert delivery and retrieve/add timestamp
         deliveries_id_map.insert({id, Delivery()});
@@ -69,6 +70,7 @@ public:
     //add all added deliveries in map to vector of deliveries
     for (const auto& id_delivery : deliveries_id_map) {
       deliveries.push_back(id_delivery.second);
+      deliveries.back().setCompany(ubereats::kUberEatsName);
     }
 
     //delete all deliveries before 2025
@@ -78,7 +80,7 @@ public:
   }
 
   void analyzeTips() const {
-    unsigned int num_deliveries = deliveries.size();
+    const auto num_deliveries = deliveries.size();
     std::cout << "TIP ANALYSIS (ALL ORDERS)" << std::endl;
     for (float amount = 0; amount <= 15; amount += 0.5) {
       int order_tip_under_amount = 
@@ -97,6 +99,56 @@ public:
       std::cout << "Percent of orders with tip <= $" <<
                    std::fixed << std::setprecision(2) << amount << ": " << 
                    ((float)order_tip_under_or_equal_amount / (float)num_deliveries) * 100 << "%" << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "TIP ANALYSIS (UBER EATS ONLY)" << std::endl;
+    const auto num_deliveries_ue = 
+        std::count_if(
+          deliveries.begin(),
+          deliveries.end(),
+          [](const auto& delivery) { return delivery.getCompany() == ubereats::kUberEatsName; });
+    for (float amount = 0; amount <= 15; amount += 0.5) {
+      const auto order_tip_under_amount_ue = 
+        std::count_if(
+          deliveries.begin(),
+          deliveries.end(),
+          [amount](const auto& delivery) { return ((delivery.tip() < amount) && (delivery.getCompany() == ubereats::kUberEatsName)); });
+      const auto order_tip_under_or_equal_amount_ue = 
+        std::count_if(
+          deliveries.begin(),
+          deliveries.end(),
+          [amount](const auto& delivery) { return ((delivery.tip() <= amount) && (delivery.getCompany() == ubereats::kUberEatsName)); });
+      std::cout << "Percent of orders with tip <  $" <<
+                   std::fixed << std::setprecision(2) << amount << ": " << 
+                   ((float)order_tip_under_amount_ue / (float)num_deliveries_ue) * 100 << "%" << std::endl;
+      std::cout << "Percent of orders with tip <= $" <<
+                   std::fixed << std::setprecision(2) << amount << ": " << 
+                   ((float)order_tip_under_or_equal_amount_ue / (float)num_deliveries_ue) * 100 << "%" << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "TIP ANALYSIS (GRUBHUB ONLY)" << std::endl;
+    const auto num_deliveries_gh = 
+        std::count_if(
+          deliveries.begin(),
+          deliveries.end(),
+          [](const auto& delivery) { return delivery.getCompany() == grubhub::kGrubhubName; });
+    for (float amount = 0; amount <= 15; amount += 0.5) {
+      const auto order_tip_under_amount_gh = 
+        std::count_if(
+          deliveries.begin(),
+          deliveries.end(),
+          [amount](const auto& delivery) { return ((delivery.tip() < amount) && (delivery.getCompany() == grubhub::kGrubhubName)); });
+      const auto order_tip_under_or_equal_amount_gh = 
+        std::count_if(
+          deliveries.begin(),
+          deliveries.end(),
+          [amount](const auto& delivery) { return ((delivery.tip() <= amount) && (delivery.getCompany() == grubhub::kGrubhubName)); });
+      std::cout << "Percent of orders with tip <  $" <<
+                   std::fixed << std::setprecision(2) << amount << ": " << 
+                   ((float)order_tip_under_amount_gh / (float)num_deliveries_gh) * 100 << "%" << std::endl;
+      std::cout << "Percent of orders with tip <= $" <<
+                   std::fixed << std::setprecision(2) << amount << ": " << 
+                   ((float)order_tip_under_or_equal_amount_gh / (float)num_deliveries_gh) * 100 << "%" << std::endl;
     }
     std::cout << std::endl;
   }
